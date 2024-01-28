@@ -1,5 +1,3 @@
-# task_manager_cli.py
-
 import argparse
 from task_manager import TaskManager, Task, TaskStatus
 
@@ -23,7 +21,6 @@ def main():
     except FileNotFoundError:
         print("File not found. Starting with an empty task list.")
 
-        # Ваше меню
     while True:
         print("\n===== Task Manager Menu =====")
         print("1. Add Task")
