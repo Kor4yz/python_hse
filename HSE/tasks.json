@@ -3,9 +3,9 @@
     {
       "title": "Другая задача",
       "description": "Описание другой задачи",
-      "status": "Новая",
+      "status": "Выполняется",
       "creation_date": "2024-01-28T16:40:00",
-      "status_change_date": "2024-01-28T16:40:00"
+      "status_change_date": "2024-01-29T14:18:49"
     },
     {
       "title": "Третья задача",
@@ -22,11 +22,11 @@
       "status_change_date": "2024-01-28T18:04:04"
     },
     {
-      "title": "Десятая задача",
-      "description": "Описание десятой задачи",
-      "status": "Новая",
-      "creation_date": "2024-01-28T18:15:55",
-      "status_change_date": "2024-01-28T18:18:13"
+      "title": "ку",
+      "description": "ку",
+      "status": "Выполняется",
+      "creation_date": "2024-01-29T14:19:05",
+      "status_change_date": "2024-01-29T14:19:05"
     }
   ]
 }

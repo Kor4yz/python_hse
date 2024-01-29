@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import ttk
 from tkinter import messagebox, simpledialog
 from task_manager import TaskManager, Task, TaskStatus
 import json
@@ -50,29 +51,105 @@ class TaskManagerGUI(tk.Tk):
     def add_task(self):
         title = simpledialog.askstring("Ввод", "Введите название задачи:")
         description = simpledialog.askstring("Ввод", "Введите описание задачи:")
-        status = simpledialog.askstring("Ввод", "Введите статус задачи (новая, выполняется, ревью, выполнено, отменено):")
 
-        try:
-            task_status = get_task_status(status)
-            self.task_manager.add_task(title, description, task_status)
-            messagebox.showinfo("Успех", "Задача успешно добавлена!")
-        except Exception as e:
-            messagebox.showerror("Ошибка", f"Ошибка при добавлении задачи: {str(e)}")
+        # Создаем список вариантов для статуса задачи
+        status_options = [status.value for status in TaskStatus]
+
+        # Создаем переменную для хранения выбранного статуса
+        selected_status = tk.StringVar(self)
+        selected_status.set(TaskStatus.НОВАЯ.value)  # Установим первый статус по умолчанию
+
+        # Создаем OptionMenu с вариантами статусов
+        status_option_menu = tk.OptionMenu(self, selected_status, *status_options)
+        status_option_menu.pack(pady=10)
+
+        def on_ok():
+            try:
+                task_status = TaskStatus[selected_status.get().upper()]
+                self.task_manager.add_task(title, description, task_status)
+                messagebox.showinfo("Успех", "Задача успешно добавлена!")
+
+                # Закрываем окно после добавления задачи
+                status_option_menu.destroy()
+                ok_button.destroy()
+            except Exception as e:
+                messagebox.showerror("Ошибка", f"Ошибка при добавлении задачи: {str(e)}")
+
+        ok_button = tk.Button(self, text="OK", command=on_ok)
+        ok_button.pack(pady=10)
 
     def change_status(self):
-        title = simpledialog.askstring("Ввод", "Введите название задачи:")
-        new_status = simpledialog.askstring("Ввод", "Введите новый статус задачи (новая, выполняется, ревью, выполнено, отменено):")
+        task_titles = [task.title for task in self.task_manager.tasks]
 
-        try:
-            task_status = get_task_status(new_status)
-            self.task_manager.change_task_status(title, task_status)
-            messagebox.showinfo("Успех", "Статус задачи успешно изменен!")
-        except Exception as e:
-            messagebox.showerror("Ошибка", f"Ошибка при изменении статуса задачи: {str(e)}")
+        if not task_titles:
+            messagebox.showinfo("Информация", "Список задач пуст. Нет задач для изменения статуса.")
+            return
+
+        task_listbox = tk.Listbox(self, selectmode=tk.SINGLE, height=min(10, len(task_titles)))
+        for title in task_titles:
+            task_listbox.insert(tk.END, title)
+
+        task_listbox.pack(pady=10)
+
+        new_status_var = tk.StringVar(self)
+        new_status_var.set(TaskStatus.НОВАЯ.value)  # Установим первый статус по умолчанию
+
+        # Создаем OptionMenu с вариантами статусов
+        status_options = [status.value for status in TaskStatus]
+        status_option_menu = tk.OptionMenu(self, new_status_var, *status_options)
+        status_option_menu.pack(pady=10)
+
+        def on_ok():
+            selected_index = task_listbox.curselection()
+            if selected_index:
+                selected_task = task_titles[selected_index[0]]
+                try:
+                    task_status = TaskStatus[new_status_var.get().upper()]
+                    self.task_manager.change_task_status(selected_task, task_status)
+                    messagebox.showinfo("Успех", "Статус задачи успешно изменен!")
+                except Exception as e:
+                    messagebox.showerror("Ошибка", f"Ошибка при изменении статуса задачи: {str(e)}")
+
+                # Закрываем окно после выбора нового статуса
+                task_listbox.destroy()
+                status_option_menu.destroy()
+                ok_button.destroy()
+
+        ok_button = tk.Button(self, text="OK", command=on_ok)
+        ok_button.pack(pady=10)
+
+        self.mainloop()  # Уберем этот вызов, так как он не нужен в данном случае
 
     def view_history(self):
-        history_text = "\n".join([f"{task.title} - {task.status} ({task.status_change_date})" for task in self.task_manager.tasks])
-        messagebox.showinfo("История задач", history_text)
+        task_titles = [task.title for task in self.task_manager.tasks]
+
+        if not task_titles:
+            messagebox.showinfo("Информация", "Список задач пуст. Нет задач для просмотра истории.")
+            return
+
+        task_listbox = tk.Listbox(self, selectmode=tk.SINGLE, height=min(10, len(task_titles)))
+        for title in task_titles:
+            task_listbox.insert(tk.END, title)
+
+        task_listbox.pack(pady=10)
+
+        def on_ok():
+            selected_index = task_listbox.curselection()
+            if selected_index:
+                selected_task = task_titles[selected_index[0]]
+                task = next((t for t in self.task_manager.tasks if t.title == selected_task), None)
+                if task:
+                    history_text = f"{task.title} - {task.status} ({task.status_change_date})"
+                    messagebox.showinfo("История задачи", history_text)
+
+                # Закрываем окно после выбора задачи
+                task_listbox.destroy()
+                ok_button.destroy()
+
+        ok_button = tk.Button(self, text="OK", command=on_ok)
+        ok_button.pack(pady=10)
+
+        self.mainloop()  # Уберем этот вызов, так как он не нужен в данном случае
 
     def delete_task(self):
         task_titles = [task.title for task in self.task_manager.tasks]
